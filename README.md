@@ -2,5 +2,5 @@
 ### Collaborators:
 Harsh Sarnaik <br>
 Manish Khandait <br>
-Prachit Mankar
+Prachit Mankar <br>
 Rutvik Raut
