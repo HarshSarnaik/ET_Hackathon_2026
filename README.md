@@ -3,6 +3,6 @@
 ### Team Lead: Rutvik R. Raut
 
 ### Collaborators:
-Harsh Sarnaik \n
-Manish Khandait \n
+Harsh Sarnaik <br>
+Manish Khandait <br>
 Prachit Mankar
