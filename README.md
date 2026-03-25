@@ -19,8 +19,7 @@ Build an intelligent system that:
 * Sends approval alerts via Slack
 * Automatically shuts down idle resources
 * Tracks and reports savings
-
----
+* Notification system with Twilio via Whatsapp and SMS
 
 ## 🧠 Key Idea
 
