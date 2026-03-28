@@ -1,120 +1,81 @@
-# ☁️ Smart Cloud Cost Saver — Phase 1
+# ☁️ Smart Cloud Cost Saver
 
-> **Rule-based detection + Savings calculator + Twilio notifications + Manual approval**
+**Intelligent Cloud Waste Detection & Automated Cost Optimization System**
 
----
-
-## Architecture
-
-```
-Cloud VMs (AWS / Mock)
-        ↓
-  fetch_data.py          — canonical schema (provider, region, metrics, cost)
-        ↓
-  detect_idle.py         — multi-signal weighted confidence scoring
-   CPU + RAM + GPU + Network + Storage I/O + Duration
-        ↓
-  cost_calc.py           — waste calc + 30d savings forecast + confidence
-        ↓
-  decision.py            — policy engine (dev=auto / staging+prod=notify)
-        ↓
-  ┌─────────────────────────────────────────┐
-  │  AUTO_SHUTDOWN (dev, high-confidence)   │ → executor.py → logger.py
-  └─────────────────────────────────────────┘
-  ┌─────────────────────────────────────────┐
-  │  NOTIFY_TWILIO (staging + prod)         │ → twilio_notify.py
-  │    WhatsApp / SMS / Voice escalation    │
-  │    Approve / Snooze / Exempt / Reject   │
-  └─────────────────────────────────────────┘
-        ↓
-  approval_server.py     — Flask server with dashboard + escalation watchdog
-```
+An AI-powered solution that detects idle cloud resources using multi-signal analysis and intelligently saves money by auto-shutdown in safe environments or notifying owners in critical ones — with real-time alerts via WhatsApp/SMS and a beautiful dashboard.
 
 ---
 
-## Quick Start
+## ✨ Key Features
 
-```bash
-# 1. Install dependencies
-pip install -r requirements.txt
+### 1. 🎯 Intelligent Idle Detection
+- Uses **Multi-Signal Detection** instead of single CPU metric
+- Analyzes **CPU, RAM, Network, and GPU** usage simultaneously
+- **Duration tracking** (e.g., idle for 2+ hours)
+- Calculates **Idle Confidence Score** for high accuracy
 
-# 2. Configure credentials
-cp .env.example .env
-# Fill in TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, phone numbers
+### 2. 💰 Real-Time Cost & Savings Forecasting
+- Shows exact **waste in ₹ / $** per idle machine per day
+- **30-Day Savings Projections**
+- **All-Time Savings Tracker** with persistent database
 
-# 3. Run in MOCK mode (no AWS or Twilio needed)
-python main.py
+### 3. 🛡️ Smart Policy Engine (Environment-Aware)
+- **Dev Environment**: Automatically shuts down high-confidence idle machines
+- **Staging / Prod**: Sends notifications instead of auto-shutdown (safety first)
 
-# 4. Open approval dashboard
-open http://localhost:5050/status
-```
+### 4. 📱 Twilio Alert System (WhatsApp & SMS)
+- Instant detailed **Waste Alerts** sent to instance owners
+- Rich context: "CPU < 5% for 4 hours"
+- One-click actions directly from phone:
+  - ✅ **Approve** shutdown
+  - 😴 **Snooze** for 24 hours
+  - 🛡️ **Exempt** for 7 days
+  - ❌ **Reject** (improves ML feedback)
 
----
+### 5. 🤖 Machine Learning Ranking
+- Uses **Isolation Forest** algorithm for anomaly detection
+- Prioritizes highest-impact and most unusual waste
+- Reduces alert fatigue by showing critical items first
 
-## Config (`config/settings.py`)
+### 6. 📊 Interactive Streamlit Dashboard
+- Live fleet overview with charts (by environment)
+- Pending Approvals section
+- Action History with exact savings
+- **Built-in Live Simulator** for safe demonstrations
 
-| Setting | Default | Description |
-|---|---|---|
-| `USE_MOCK` | `True` | Simulated VM data vs live AWS |
-| `CPU_IDLE_THRESHOLD` | `10%` | Below = CPU idle signal |
-| `RAM_IDLE_THRESHOLD` | `20%` | Below = RAM idle signal |
-| `IDLE_CONFIDENCE_THRESHOLD` | `0.60` | Minimum score to flag |
-| `AUTO_SHUTDOWN_CONFIDENCE_FLOOR` | `0.70` | Minimum to auto-stop dev |
-| `ESCALATION_TIMEOUT_MINUTES` | `15` | Re-alert if no ACK |
+### 7. 🎟️ Automated Jira Integration
+- Automatically creates Jira tickets for flagged Production/Staging instances
 
----
-
-## Idle Detection Logic
-
-A VM is flagged only when **all** of:
-1. CPU < threshold  *(required)*
-2. Duration >= 2h   *(required)*
-3. Weighted score >= 0.60 across CPU + RAM + GPU + Network + Storage
-
-This prevents false positives on:
-- Low-CPU but high-memory databases
-- Low-CPU but high-network message brokers
-- GPU instances between training runs
-
-Each flagged VM gets an `explanation` array:
-```json
-["cpu<10% for 14.3h (actual: 5.2%)", "memory<20% for 14.3h (actual: 18.4%)", "network<0.5MB/s (actual: 0.003MB/s)"]
-```
+### 8. 🔄 Continuous Feedback Loop
+- Learns from Approve/Reject decisions
+- Calculates and displays **Precision Score** over time
 
 ---
 
-## Decision Policy
+## 🏗️ Architecture & Workflow
 
-| Environment | Action | Requires Approval |
-|---|---|---|
-| `dev` | AUTO_SHUTDOWN (if conf ≥ 70%) | ❌ |
-| `staging` | NOTIFY_TWILIO | ✅ |
-| `prod` | NOTIFY_TWILIO (CRITICAL) | ✅ |
-| Protected (db/primary) | NOTIFY_TWILIO | ✅ always |
-
----
-
-## Twilio Alert Flow
-
-```
-VM flagged → WhatsApp/SMS to owner team
-                ↓
-         [15 min ACK timeout]
-                ↓ (no response)
-         Escalate → manager / on-call
-                ↓ (prod CRITICAL)
-         Voice call fallback
-
-Action links in every alert:
-  ✅ Approve  😴 Snooze 24h  🛡️ Exempt 7d  ❌ Reject
-```
-
----
-
-## Roadmap
-
-| Phase | Status | Scope |
-|---|---|---|
-| **Phase 1** | ✅ This codebase | Rule-based + Twilio + manual approval |
-| Phase 2 | 🔜 | Policy engine + auto-actions + audit trail |
-| Phase 3 | 🔜 | ML anomaly detection + savings forecasting + feedback loop |
+```mermaid
+flowchart TD
+    A[Cloud Environments] -->|API / Simulator| B(1. Fetch Data)
+    B --> C(2. Quality Gate)
+   
+    C -->|Valid Metrics| D(3. Idle Detection Engine)
+    D -->|Flags VMs| E(4. Cost & Savings Calculator)
+   
+    E --> F(5. ML Ranking\nIsolation Forest)
+   
+    F --> G{6. Smart Policy Engine}
+   
+    G -->|Dev & Safe| H[Auto-Shutdown Executor]
+    G -->|Staging / Prod| I[Twilio Notification System]
+   
+    I -.->|WhatsApp / SMS| J((Human Engineer))
+    J -.->|Approve / Snooze| K[Approval Webhook Server]
+    K --> H
+   
+    G -->|All Flagged VMs| L[Jira Ticketing Integration]
+   
+    H --> M[(SQLite Tracking DB)]
+    K --> M
+   
+    M --> N[Streamlit Dashboard / UI]
