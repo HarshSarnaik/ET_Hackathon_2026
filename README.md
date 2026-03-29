@@ -79,3 +79,13 @@ flowchart TD
     K --> M
    
     M --> N[Streamlit Dashboard / UI]
+
+
+---
+
+## 👨‍💻 Contributors
+
+- Manish Khandait  
+- Harsh Sarnaik  
+- Rutvik Raut  
+- Prachit Mankar  
